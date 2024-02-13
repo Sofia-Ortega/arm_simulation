@@ -2,6 +2,22 @@ import pygame
 import sys
 from math import sin, cos, pi, radians;
 
+
+RECORDING = False 
+REPLAY = True
+FILE_PATH = 'output.txt'
+
+if RECORDING:
+    f = open(FILE_PATH, 'w')
+    f.write('Elbow Angle, Wrist Angle\n')
+if REPLAY:
+    f = open(FILE_PATH, 'r')
+    print(f.readline().strip()) # remove the title of columns
+
+
+
+
+
 # Initialize Pygame
 pygame.init()
 
@@ -60,43 +76,50 @@ down_pressed = False
 
 # Game loop
 clock = pygame.time.Clock()
+exit_simulation = False
 while True:
     screen.fill(BLACK)  # Fill the screen with white color
 
+    # start recording 
+    if RECORDING:
+        f.write(f'{elbow_angle},{wrist_angle}\n')
+    elif REPLAY:
+        line = f.readline()
+        if line:
+            angles = line.strip().split(",")
+            elbow_angle = int(angles[0])
+            wrist_angle = int(angles[1])
+        else:
+            exit_simulation = True
+        
+
     # Handle events
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT or exit_simulation:
+            f.close()
             pygame.quit()
             sys.exit()
 
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                # Set the "w_pressed" flag to True when "w" key is pressed
-                w_pressed = True
-            elif event.key == pygame.K_s:
-                # Set the "s_pressed" flag to True when "s" key is pressed
-                s_pressed = True
-            elif event.key == pygame.K_UP:
-                # Set the "up_pressed" flag to True when up arrow key is pressed
-                up_pressed = True
-            elif event.key == pygame.K_DOWN:
-                # Set the "down_pressed" flag to True when down arrow key is pressed
-                down_pressed = True
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_w:
-                # Set the "w_pressed" flag to False when "w" key is released
-                w_pressed = False
-            elif event.key == pygame.K_s:
-                # Set the "s_pressed" flag to False when "s" key is released
-                s_pressed = False
-            elif event.key == pygame.K_UP:
-                # Set the "up_pressed" flag to False when up arrow key is released
-                up_pressed = False
-            elif event.key == pygame.K_DOWN:
-                # Set the "down_pressed" flag to False when down arrow key is released
-                down_pressed = False
+        if RECORDING: 
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    w_pressed = True
+                elif event.key == pygame.K_s:
+                    s_pressed = True
+                elif event.key == pygame.K_UP:
+                    up_pressed = True
+                elif event.key == pygame.K_DOWN:
+                    down_pressed = True
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_w:
+                    w_pressed = False
+                elif event.key == pygame.K_s:
+                    s_pressed = False
+                elif event.key == pygame.K_UP:
+                    up_pressed = False
+                elif event.key == pygame.K_DOWN:
+                    down_pressed = False
 
-    # Update elbow_angle
     if w_pressed:
         elbow_angle += elbow_angle_speed
         print("Elbow Angle (Incremented):", elbow_angle)
