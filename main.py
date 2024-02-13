@@ -3,11 +3,14 @@ import sys
 from math import sin, cos, pi, radians;
 
 
-RECORDING = False 
-REPLAY = True
+RECORD = False 
+REPLAY = True 
 FILE_PATH = 'output.txt'
 
-if RECORDING:
+if RECORD and REPLAY:
+    print("You cannot record and replay at the same time")
+    sys.exit()
+if RECORD:
     f = open(FILE_PATH, 'w')
     f.write('Elbow Angle, Wrist Angle\n')
 if REPLAY:
@@ -73,24 +76,36 @@ s_pressed = False
 up_pressed = False
 down_pressed = False
 
+new_elbow_angle = elbow_angle
+new_wrist_angle = wrist_angle
+timestamp = 0
+
 
 # Game loop
 clock = pygame.time.Clock()
 exit_simulation = False
+frame_counter = 0
+
 while True:
     screen.fill(BLACK)  # Fill the screen with white color
 
-    # start recording 
-    if RECORDING:
-        f.write(f'{elbow_angle},{wrist_angle}\n')
-    elif REPLAY:
-        line = f.readline()
-        if line:
-            angles = line.strip().split(",")
-            elbow_angle = int(angles[0])
-            wrist_angle = int(angles[1])
-        else:
-            exit_simulation = True
+    if REPLAY:
+        print("Frame counter: ", frame_counter)
+        if timestamp <= frame_counter:
+            print(f"update [{timestamp},{elbow_angle},{wrist_angle}]")
+            elbow_angle = new_elbow_angle
+            wrist_angle = new_wrist_angle
+
+            line = f.readline().strip()
+            if line:
+                arr = line.strip().split(",")
+
+                timestamp = int(arr[0]) # frame number 
+                new_elbow_angle = int(arr[1])
+                new_wrist_angle = int(arr[2])
+
+            else:
+                exit_simulation = True
         
 
     # Handle events
@@ -100,7 +115,7 @@ while True:
             pygame.quit()
             sys.exit()
 
-        if RECORDING: 
+        if RECORD: 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
                     w_pressed = True
@@ -136,9 +151,13 @@ while True:
     if down_pressed:
         wrist_angle -= wrist_angle_speed
         print("Wrist Angle (Decremented):", wrist_angle)
+    
 
     elbow_angle %= 360
     wrist_angle %= 360
+
+    if RECORD and (w_pressed or s_pressed or up_pressed or down_pressed):
+        f.write(f'{frame_counter},{elbow_angle},{wrist_angle}\n')
 
     set_elbow_coord()
     set_wrist_coord()
@@ -154,4 +173,4 @@ while True:
     pygame.display.flip()
     clock.tick(60)  # Limit the frame rate to 60 FPS
 
-    clock.tick(60)
+    frame_counter += 1
