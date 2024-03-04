@@ -5,7 +5,7 @@ from math import sin, cos, pi, radians;
 
 RECORD = False 
 REPLAY = True 
-FILE_PATH = 'output.txt'
+FILE_PATH = 'output/output.txt'
 
 if RECORD and REPLAY:
     print("You cannot record and replay at the same time")

@@ -1,2 +1,4 @@
 
+output/*
 myenv/
+three-test/node_modules
